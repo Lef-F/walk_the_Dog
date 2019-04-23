@@ -35,18 +35,28 @@ model.compile({
   metrics: ['acc']
 });
 
+// get all the layers of the model
+const layers = model.layers
+
+function layerOutputs(topInput) {
+    let input = [layers[0].apply(topInput)];
+    
+    // passing Input to every layer and saving output as input for next layer    
+    for (var i = 1; i < model.layers.length; i++) {
+        input.push(layers[i].apply(input[i-1]));
+    };
+    return input;
+}
+
 model.predict(tf.tensor([0,1,2,3,4,0,1,2,3,4], [1, 10, 1], "int32")).print();
 
-// // get all the layers of the model
-// const layers = model.layers
+let outs = layerOutputs(tf.tensor([0,1,2,3,4,0,1,2,3,4], [1, 10, 1], "int32"));
+console.log(outs[1].dataSync());
 
-// // second model
-// const model2 = tf.model({
-//   inputs: layers[0].input, 
-//   outputs: layers[0].output
-// })
-
-// model2.predict(tf.tensor([0,1,2,3,4,0,1,2,3,4], [1, 10, 1], "int32")).print();
+function computeNextMove(outs, ins) {
+    let maxInd = tf.tensor1d(outs).argMax().dataSync();
+    return ins.concat(tf.tensor1d(maxInd));
+}
 
 let trainSet = [];
 for (let i = 0; i < 500; i++){
@@ -54,14 +64,17 @@ for (let i = 0; i < 500; i++){
 };
 
 let trainIndex = 0;
+let newMoves = computeNextMove(outs[1].dataSync(), tf.tensor1d(trainSet[trainIndex]));
 
 function trainIteration(train, label) {
     console.log('Training model...');
-    tf.tensor(train, [train.length, 1]).print();
-    tf.tensor(label, [label.length, 1]).print();
+    let input = tf.tensor(train, [1, train.length, 1]);
+    input.print();
+    let action = tf.tensor(label, [label.length, 1]);
+    action.print();
     model.fit(
-        tf.tensor(train, [1, train.length, 1]),
-        tf.tensor(label, [label.length, 1]), 
+        input,
+        action, 
         {
             epochs: 1,
             callbacks: {
@@ -75,11 +88,14 @@ function trainIteration(train, label) {
         }
     );
     trainIndex += 1;
+    let newMove = tf.tensor(trainSet[trainIndex], [1, trainSet[trainIndex].length, 1]);
+    newMoves = computeNextMove(layerOutputs(newMove)[1].dataSync(), tf.tensor1d(trainSet[trainIndex]))
 };
 
-setInterval(function() {playAnimation(trainSet[trainIndex])}, 5000);
+setInterval(function() {playAnimation()}, 5000);
 
-function playAnimation(animSeq) {
+function playAnimation() {
+    let animSeq = newMoves.dataSync();
     var i = 0;
     (function loop() {
         let data = {"key": mapping[animSeq[i]]}

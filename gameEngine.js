@@ -74,6 +74,8 @@ function timeElapsedKey() {
     return timeElapsed;
 }
 
+let goodDances = [];
+
 function keyAction(e) {
     if (e.key == "d") {
         Body.rotate(frontLeg, degToRad(45));
@@ -88,6 +90,7 @@ function keyAction(e) {
     } else if (e.key == "b") {
         trainIteration(trainSet[trainIndex], [0]);
     } else if (e.key == "g") {
+        goodDances.push(trainSet[trainIndex]);
         trainIteration(trainSet[trainIndex], [1]);
     }
 
