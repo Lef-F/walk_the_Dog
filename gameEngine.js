@@ -74,11 +74,17 @@ function timeElapsedKey() {
     return timeElapsed;
 }
 
-function resetBody(){
+
+function resetLegs(){
     Body.setAngle(backLeg, degToRad(-90));
     Body.setAngle(frontLeg, degToRad(90));
+};
+
+function resetBody(){
+    resetLegs();
     Body.setPosition(dog, Matter.Vector.create(250, 400));
 };
+
 
 let goodDances = [];
 
@@ -94,9 +100,15 @@ function keyAction(e) {
     } else if (e.key == " ") {
         resetBody();
     } else if (e.key == "b") {
+        updateData({x: trainSet[trainIndex].dataSync()[0], 
+            y: trainSet[trainIndex].dataSync()[1]},
+            1);
         trainIteration(trainSet[trainIndex], [0]);
         resetBody();
     } else if (e.key == "g") {
+        updateData({x: trainSet[trainIndex].dataSync()[0], 
+            y: trainSet[trainIndex].dataSync()[1]},
+            0);
         goodDances.push(trainSet[trainIndex]);
         trainIteration(trainSet[trainIndex], [1]);
         resetBody();

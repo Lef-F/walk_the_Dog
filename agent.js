@@ -1,27 +1,9 @@
 // map actions to integers (i.e. array indices)
 let mapping = [ "p", "a", "s", "d", "f"];
-const numOfMoves = 5;
+const numOfMoves = 20;
 const numOfDims = 2; // For gaussian random
 
-// random seq generator
-function randSeqGen(seqLen) {
-    let output = [];
-    for (let i = 0; i < seqLen; i++ ){
-        output.push(Math.floor(Math.random() * mapping.length));
-    };
-    return output;
-};
-
-function randLabGen(seqLen=5) {
-    let output = [];
-    for (let i = 0; i < seqLen; i++ ){
-        output.push(0);
-    };
-    let index = Math.floor(Math.random() * seqLen-1)
-    output[index] = 1;
-    return output;
-};
-
+// Sample an N-dimensional datapoint from gaussian distribution
 function randGaussian(numOfDims) {
     return tf.randomNormal([1, numOfDims]);
 }
@@ -104,7 +86,7 @@ function trainIteration(train, label) {
     newMoves = extractMoves(layerOutputs(trainSet[trainIndex])[moveLayer].dataSync());
 };
 
-setInterval(function() {playAnimation()}, 5000);
+setInterval(function() {resetLegs(); playAnimation();}, 3000);
 
 function playAnimation() {
     let animSeq = newMoves.dataSync();
@@ -113,7 +95,7 @@ function playAnimation() {
         let data = {"key": mapping[animSeq[i]]}
         keyAction(data);
         if (++i < animSeq.length) {
-            setTimeout(loop, 100);
+            setTimeout(loop, 50);
         }
     })();
 };
